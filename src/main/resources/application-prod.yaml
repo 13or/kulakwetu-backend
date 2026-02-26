@@ -1,0 +1,60 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  mail:
+    host: ${SPRING_MAIL_HOST:}
+    port: ${SPRING_MAIL_PORT:587}
+    protocol: smtp
+    username: ${SPRING_MAIL_USERNAME:}
+    password: ${SPRING_MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${SPRING_MAIL_SMTP_AUTH:true}
+          ssl:
+            enable: ${SPRING_MAIL_SMTP_SSL_ENABLE:true}
+          starttls:
+            enable: false
+          from: support@agrisol.group
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    access-token-ttl-seconds: 3600
+    refresh-token-ttl-seconds: 604800
+    refresh-token-remember-ttl-seconds: 2592000
+  identity:
+    verification-link-base-url: ${APP_IDENTITY_VERIFICATION_LINK_BASE_URL:https://app.kulakwetu.com/auth/verify?token=}
+    reset-password-link-base-url: ${APP_IDENTITY_RESET_PASSWORD_LINK_BASE_URL:https://app.kulakwetu.com/auth/reset-password?token=}
+  twilio:
+    enabled: ${APP_TWILIO_ENABLED:false}
+    account-sid: ${APP_TWILIO_ACCOUNT_SID:}
+    auth-token: ${APP_TWILIO_AUTH_TOKEN:}
+    from-number: ${APP_TWILIO_FROM_NUMBER:}
+
+logging:
+  level:
+    root: INFO
+    org.springframework: INFO
+
+server:
+  forward-headers-strategy: framework
