@@ -1,0 +1,74 @@
+spring:
+  application:
+    name: kulakwetu-backend
+  profiles:
+    active: local
+
+  datasource:
+    url: ${DATASOURCE_URL}
+    username: ${DATASOURCE_USERNAME}
+    password: ${DATASOURCE_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: false
+
+  mail:
+    host: ${SPRING_MAIL_HOST:ssl0.ovh.net}
+    port: ${SPRING_MAIL_PORT:465}
+    protocol: smtp
+    username: ${SPRING_MAIL_USERNAME:support@agrisol.group}
+    password: ${SPRING_MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: ${SPRING_MAIL_SMTP_AUTH:true}
+          ssl:
+            enable: ${SPRING_MAIL_SMTP_SSL_ENABLE:true}
+          starttls:
+            enable: false
+          from: ${SPRING_MAIL_FROM:support@agrisol.group}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: when_authorized
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+app:
+  jwt:
+    secret: ${APP_JWT_SECRET:}
+    access-token-ttl-seconds: ${APP_JWT_ACCESS_TTL_SECONDS:3600}
+    refresh-token-ttl-seconds: ${APP_JWT_REFRESH_TTL_SECONDS:604800}
+    refresh-token-remember-ttl-seconds: ${APP_JWT_REFRESH_REMEMBER_TTL_SECONDS:2592000}
+
+  identity:
+    verification-link-base-url: ${APP_IDENTITY_VERIFICATION_LINK_BASE_URL:http://localhost:4200/auth/verify?token=}
+    reset-password-link-base-url: ${APP_IDENTITY_RESET_PASSWORD_LINK_BASE_URL:http://localhost:4200/auth/reset-password?token=}
+
+  twilio:
+    enabled: ${APP_TWILIO_ENABLED:true}
+    account-sid: ${TWILIO_ACCOUNT_SID:}
+    auth-token: ${TWILIO_AUTH_TOKEN:}
+    from-number: ${TWILIO_FROM_NUMBER:}
+
+server:
+  port: ${SERVER_PORT:8080}
