@@ -42,6 +42,9 @@ app:
     access-token-ttl-seconds: 3600
     refresh-token-ttl-seconds: 604800
     refresh-token-remember-ttl-seconds: 2592000
+    issuer: ${APP_JWT_ISSUER:kulakwetu-backend}
+    audience: ${APP_JWT_AUDIENCE:kulakwetu-api}
+    strict-claim-validation: ${APP_JWT_STRICT_CLAIM_VALIDATION:false}
   identity:
     verification-link-base-url: ${APP_IDENTITY_VERIFICATION_LINK_BASE_URL:https://app.kulakwetu.com/auth/verify?token=}
     reset-password-link-base-url: ${APP_IDENTITY_RESET_PASSWORD_LINK_BASE_URL:https://app.kulakwetu.com/auth/reset-password?token=}

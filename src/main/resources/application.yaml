@@ -60,6 +60,9 @@ app:
     access-token-ttl-seconds: ${APP_JWT_ACCESS_TTL_SECONDS:3600}
     refresh-token-ttl-seconds: ${APP_JWT_REFRESH_TTL_SECONDS:604800}
     refresh-token-remember-ttl-seconds: ${APP_JWT_REFRESH_REMEMBER_TTL_SECONDS:2592000}
+    issuer: ${APP_JWT_ISSUER:kulakwetu-backend}
+    audience: ${APP_JWT_AUDIENCE:kulakwetu-api}
+    strict-claim-validation: ${APP_JWT_STRICT_CLAIM_VALIDATION:false}
 
   identity:
     verification-link-base-url: ${APP_IDENTITY_VERIFICATION_LINK_BASE_URL:http://localhost:4200/auth/verify?token=}
@@ -70,6 +73,7 @@ app:
     account-sid: ${TWILIO_ACCOUNT_SID:}
     auth-token: ${TWILIO_AUTH_TOKEN:}
     from-number: ${TWILIO_FROM_NUMBER:}
+
   agricash:
     default-currency: ${APP_AGRICASH_DEFAULT_CURRENCY:CDF}
 
