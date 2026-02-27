@@ -7,6 +7,7 @@ import com.kulakwetu.common.exception.DomainException;
 import com.kulakwetu.common.exception.ResourceNotFoundException;
 import com.kulakwetu.common.util.IdentifierUtils;
 import com.kulakwetu.identity.dto.*;
+import lombok.extern.slf4j.Slf4j;
 import com.kulakwetu.identity.entity.*;
 import com.kulakwetu.identity.enums.TokenChannel;
 import com.kulakwetu.identity.gateway.EmailGateway;
@@ -20,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Locale;
 import java.util.List;
@@ -27,6 +29,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -59,6 +62,9 @@ public class AuthService {
     @Value("${app.identity.reset-password-link-base-url:http://localhost:4200/auth/reset-password?token=}")
     private String resetPasswordLinkBaseUrl;
 
+    @Value("${app.agricash.default-currency:CDF}")
+    private String defaultWalletCurrency;
+
     @Transactional
     public RegisterResponse register(RegisterRequest request) {
         validateUniqueness(request);
@@ -90,6 +96,8 @@ public class AuthService {
         Wallet wallet = walletRepository.save(Wallet.builder()
                 .id(UUID.randomUUID())
                 .userId(user.getId())
+                .currency(defaultWalletCurrency)
+                .balance(BigDecimal.ZERO)
                 .status(WalletStatus.ACTIVE)
                 .createdAt(OffsetDateTime.now())
                 .build());
@@ -228,23 +236,30 @@ public class AuthService {
         TokenChannel channel = (user.getEmail() != null && !user.getEmail().isBlank()) ? TokenChannel.EMAIL : TokenChannel.SMS;
         PasswordResetToken resetToken = tokenService.createPasswordResetToken(user.getId(), channel);
 
-        if (channel == TokenChannel.EMAIL) {
-            String link = resetPasswordLinkBaseUrl + resetToken.getToken();
-            emailGateway.sendPasswordResetLink(user.getEmail(), link);
-            return;
+        try {
+            if (channel == TokenChannel.EMAIL) {
+                String link = resetPasswordLinkBaseUrl + resetToken.getToken();
+                emailGateway.sendPasswordResetLink(user.getEmail(), link);
+                return;
+            }
+            smsGateway.sendPasswordResetCode(user.getPhoneNumber(), resetToken.getToken());
+        } catch (RuntimeException ex) {
+            log.error("Failed to dispatch password reset token for user {} via {}", user.getId(), channel, ex);
         }
-
-        smsGateway.sendPasswordResetCode(user.getPhoneNumber(), resetToken.getToken());
     }
 
     private void dispatchVerification(User user, VerificationToken verificationToken) {
-        if (verificationToken.getChannel() == TokenChannel.SMS) {
-            smsGateway.sendVerificationCode(user.getPhoneNumber(), verificationToken.getToken());
-            return;
-        }
+        try {
+            if (verificationToken.getChannel() == TokenChannel.SMS) {
+                smsGateway.sendVerificationCode(user.getPhoneNumber(), verificationToken.getToken());
+                return;
+            }
 
-        String link = verificationLinkBaseUrl + verificationToken.getToken();
-        emailGateway.sendVerificationLink(user.getEmail(), link);
+            String link = verificationLinkBaseUrl + verificationToken.getToken();
+            emailGateway.sendVerificationLink(user.getEmail(), link);
+        } catch (RuntimeException ex) {
+            log.error("Failed to dispatch verification token for user {} via {}", user.getId(), verificationToken.getChannel(), ex);
+        }
     }
 
 

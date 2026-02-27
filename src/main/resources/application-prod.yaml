@@ -51,6 +51,9 @@ app:
     auth-token: ${APP_TWILIO_AUTH_TOKEN:}
     from-number: ${APP_TWILIO_FROM_NUMBER:}
 
+  agricash:
+    default-currency: ${APP_AGRICASH_DEFAULT_CURRENCY:CDF}
+
 logging:
   level:
     root: INFO
